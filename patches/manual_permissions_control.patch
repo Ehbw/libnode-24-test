@@ -1,0 +1,107 @@
+diff --git forkSrcPrefix/src/node.h forkDstPrefix/src/node.h
+index 60598f54114b2424f10706e57d8aa50c4634bcb0..b3ebb94dd63ee7edaf8c80f0759ef43d690d54c2 100644
+--- forkSrcPrefix/src/node.h
++++ forkDstPrefix/src/node.h
+@@ -137,6 +137,12 @@ class TracingController;
+ 
+ }
+ 
++namespace permission {
++
++enum class PermissionScope;
++
++}  // namespace permission
++
+ NODE_EXTERN v8::Local<v8::Value> ErrnoException(v8::Isolate* isolate,
+                                                 int errorno,
+                                                 const char* syscall = nullptr,
+@@ -769,6 +775,12 @@ NODE_EXTERN v8::MaybeLocal<v8::Value> LoadEnvironment(
+     EmbedderPreloadCallback preload = nullptr);
+ NODE_EXTERN void FreeEnvironment(Environment* env);
+ 
++// Set a callback for permission control
++NODE_EXTERN void SetPermissionHandler(Environment* env,
++    std::function<bool(Environment*,
++                       permission::PermissionScope,
++                       const std::string_view&)>&& handler);
++
+ // Set a callback that is called when process.exit() is called from JS,
+ // overriding the default handler.
+ // It receives the Environment* instance and the exit code as arguments.
+diff --git forkSrcPrefix/src/api/environment.cc forkDstPrefix/src/api/environment.cc
+index ad323fc800a33c010b0504a4aa55c107498dee26..ec3d61159060f6efbebff3f3a2473a32d11c366a 100644
+--- forkSrcPrefix/src/api/environment.cc
++++ forkDstPrefix/src/api/environment.cc
+@@ -922,4 +922,11 @@ void SetProcessExitHandler(Environment* env,
+   });
+ }
+ 
++void SetPermissionHandler(Environment* env,
++    std::function<bool(Environment*,
++                       permission::PermissionScope,
++                       const std::string_view&)>&& handler) {
++  env->permission()->EnableManualPermissionControl(std::move(handler));
++}
++
+ }  // namespace node
+diff --git forkSrcPrefix/src/permission/permission.cc forkDstPrefix/src/permission/permission.cc
+index 7c84aa044dbbf58e2ae05f29d2cfad5502ea745e..c47992d2b3cdc068e1b74bc36767ded0e1c25acb 100644
+--- forkSrcPrefix/src/permission/permission.cc
++++ forkDstPrefix/src/permission/permission.cc
+@@ -152,6 +152,12 @@ void Permission::EnablePermissions() {
+   }
+ }
+ 
++void Permission::EnableManualPermissionControl(
++    PermissionCheckCallback&& permission_check_callback) {
++  enabled_ = true;
++  permission_check_callback_ = std::move(permission_check_callback);
++}
++
+ void Permission::Apply(Environment* env,
+                        const std::vector<std::string>& allow,
+                        PermissionScope scope) {
+diff --git forkSrcPrefix/src/permission/permission.h forkDstPrefix/src/permission/permission.h
+index 8e5bb87803656f857602736abbb077ec2e192589..3c457293e95fbe6c275829e1c88fa46ab4776703 100644
+--- forkSrcPrefix/src/permission/permission.h
++++ forkDstPrefix/src/permission/permission.h
+@@ -47,6 +47,11 @@ namespace permission {
+ 
+ class Permission {
+  public:
++  using PermissionCheckCallback =
++      std::function<bool(Environment* env,
++                         PermissionScope permission,
++                         const std::string_view& resource)>;
++
+   Permission();
+ 
+   FORCE_INLINE bool is_granted(Environment* env,
+@@ -55,6 +60,9 @@ class Permission {
+     if (!enabled_) [[likely]] {
+       return true;
+     }
++    if (permission_check_callback_) {
++      return permission_check_callback_(env, permission, res);
++    }
+     return is_scope_granted(env, permission, res);
+   }
+ 
+@@ -76,6 +84,9 @@ class Permission {
+              PermissionScope scope);
+   void EnablePermissions();
+ 
++  void EnableManualPermissionControl(
++      PermissionCheckCallback&& permission_check_callback);
++
+  private:
+   COLD_NOINLINE bool is_scope_granted(Environment* env,
+                                       const PermissionScope permission,
+@@ -89,6 +100,7 @@ class Permission {
+ 
+   std::unordered_map<PermissionScope, std::shared_ptr<PermissionBase>> nodes_;
+   bool enabled_;
++  PermissionCheckCallback permission_check_callback_;
+ };
+ 
+ }  // namespace permission

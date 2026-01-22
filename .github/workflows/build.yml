@@ -45,7 +45,7 @@ jobs:
         run: |
           $startInfo = New-Object System.Diagnostics.ProcessStartInfo
           $startInfo.FileName = "${{ steps.vsinst.outputs.cmd }}"
-          $startInfo.Arguments = 'modify --installPath "${{ steps.vs.outputs.path }}" --add Microsoft.VisualStudio.Component.VC.14.36.17.6.x86.x64 --passive --norestart --wait --noUpdateInstaller'
+          $startInfo.Arguments = 'modify --installPath "${{ steps.vs.outputs.path }}" --add Microsoft.VisualStudio.Component.VC.14.36.17.6.x86.x64 --quiet --norestart --wait --noUpdateInstaller'
           $process = New-Object System.Diagnostics.Process
           $process.StartInfo = $startInfo
           $process.Start()

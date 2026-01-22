@@ -1,107 +1,47 @@
-diff --git forkSrcPrefix/src/node.h forkDstPrefix/src/node.h
-index 60598f54114b2424f10706e57d8aa50c4634bcb0..9213adb06dd45f521867591ff9a4af70096802de 100644
---- forkSrcPrefix/src/node.h
-+++ forkDstPrefix/src/node.h
-@@ -228,6 +228,67 @@ namespace node {
+diff --git forkSrcPrefix/deps/v8/src/api/api.cc forkDstPrefix/deps/v8/src/api/api.cc
+index 2dd476dda34f1cfe3a75b7895009af24963372f2..6476204733a8aa87c4681dbeb5fee12db54e529d 100644
+--- forkSrcPrefix/deps/v8/src/api/api.cc
++++ forkDstPrefix/deps/v8/src/api/api.cc
+@@ -883,7 +883,21 @@ void InternalFieldOutOfBounds(int index) {
  
- class IsolateData;
- class Environment;
-+
-+class ScopeCB
-+{
-+  v8::Isolate* m_isolate;
-+public:
-+ inline ScopeCB(v8::Isolate* isolate) : m_isolate(isolate) {
-+    if(g_enterScopeCB) {
-+      g_enterScopeCB(isolate);
-+    }
-+  }
-+
-+  inline ~ScopeCB() {
-+    if(g_leaveScopeCB) {
-+      g_leaveScopeCB(m_isolate);
-+    }
-+  }
-+
-+  inline static std::function<void(v8::Isolate*)> g_enterScopeCB;
-+  inline static std::function<void(v8::Isolate*)> g_leaveScopeCB;
-+};
-+
-+NODE_EXTERN void SetScopeHandler(const std::function<void(v8::Isolate*)>& enter,
-+                     const std::function<void(v8::Isolate*)>& exit);
-+
-+class NodeHandleScope
-+{
-+  ScopeCB m_scopeCB;
-+  v8::HandleScope m_handleScope; 
-+public:
-+  inline NodeHandleScope(v8::Isolate* isolate) : m_scopeCB(isolate), m_handleScope(isolate) {}
-+  inline ~NodeHandleScope() = default;
-+};
-+
-+class NodeEscapableHandleScope
-+{
-+  ScopeCB m_scopeCB;
-+  v8::EscapableHandleScope m_handleScope; 
-+public:
-+  inline NodeEscapableHandleScope(v8::Isolate* isolate) : m_scopeCB(isolate), m_handleScope(isolate) {}
-+  inline ~NodeEscapableHandleScope() = default;
-+
-+  template <class T>
-+  inline v8::Local<T> Escape(v8::Local<T> value) {
-+    return m_handleScope.Escape(value);
-+  }
-+
-+  template <class T>
-+  inline v8::MaybeLocal<T> EscapeMaybe(v8::MaybeLocal<T> value) {
-+    return m_handleScope.EscapeMaybe(value);
-+  }
-+};
-+
-+class NodeSealHandleScope
-+{
-+  ScopeCB m_scopeCB;
-+  v8::SealHandleScope m_handleScope; 
-+public:
-+  inline NodeSealHandleScope(v8::Isolate* isolate) : m_scopeCB(isolate), m_handleScope(isolate) {}
-+  inline ~NodeSealHandleScope() = default;
-+};
-+
- class MultiIsolatePlatform;
- class InitializationResultImpl;
+ // --- H a n d l e s ---
  
-diff --git forkSrcPrefix/src/node.cc forkDstPrefix/src/node.cc
-index 1a2a43bdd37441400323a800c147fcb89f0d549a..81f15f01e2a59f3752254a768f6a58d4286a23fc 100644
---- forkSrcPrefix/src/node.cc
-+++ forkDstPrefix/src/node.cc
-@@ -290,7 +290,7 @@ void Environment::InitializeDiagnostics() {
- 
- static
- MaybeLocal<Value> StartExecution(Environment* env, const char* main_script_id) {
--  EscapableHandleScope scope(env->isolate());
-+  NodeEscapableHandleScope scope(env->isolate());
-   CHECK_NOT_NULL(main_script_id);
-   Realm* realm = env->principal_realm();
- 
-@@ -338,7 +338,7 @@ MaybeLocal<Value> StartExecution(Environment* env, StartExecutionCallback cb) {
-   // Only snapshot builder or embedder applications set the
-   // callback.
-   if (cb != nullptr) {
--    EscapableHandleScope scope(env->isolate());
-+    NodeEscapableHandleScope scope(env->isolate());
- 
-     Local<Value> result;
-     if (env->isolate_data()->is_building_snapshot()) {
-@@ -1548,6 +1548,12 @@ int Stop(Environment* env, StopFlags::Flags flags) {
-   return 0;
- }
- 
-+void SetScopeHandler(const std::function<void(v8::Isolate*)>& enter,
-+                     const std::function<void(v8::Isolate*)>& exit) {
-+  ScopeCB::g_enterScopeCB = enter;
-+  ScopeCB::g_leaveScopeCB = exit;
+-HandleScope::HandleScope(Isolate* v8_isolate) { Initialize(v8_isolate); }
++static std::function<void(Isolate*)> g_enterScopeCB;
++static std::function<void(Isolate*)> g_leaveScopeCB;
++
++V8_EXPORT void SetScopeHandler(const std::function<void(Isolate*)>& enter,
++                     const std::function<void(Isolate*)>& exit) {
++  g_enterScopeCB = enter;
++  g_leaveScopeCB = exit;
 +}
 +
- }  // namespace node
++HandleScope::HandleScope(Isolate* v8_isolate) {
++  if(g_enterScopeCB) {
++    g_enterScopeCB(v8_isolate);
++  }
++  Initialize(v8_isolate);
++}
  
- #if !HAVE_INSPECTOR
+ void HandleScope::Initialize(Isolate* v8_isolate) {
+   i::Isolate* i_isolate = reinterpret_cast<i::Isolate*>(v8_isolate);
+@@ -908,6 +922,9 @@ void HandleScope::Initialize(Isolate* v8_isolate) {
+ }
+ 
+ HandleScope::~HandleScope() {
++  if(g_leaveScopeCB) {
++    g_leaveScopeCB(reinterpret_cast<Isolate*>(i_isolate_));
++  }
+ #ifdef V8_ENABLE_CHECKS
+   CHECK_EQ(scope_level_, i_isolate_->handle_scope_data()->level);
+ #endif
+@@ -938,6 +955,9 @@ i::Address* HandleScope::CreateHandleForCurrentIsolate(i::Address value) {
+ #endif  // V8_ENABLE_DIRECT_LOCAL
+ 
+ EscapableHandleScopeBase::EscapableHandleScopeBase(Isolate* v8_isolate) {
++  if(g_enterScopeCB) {
++    g_enterScopeCB(v8_isolate);
++  }
+   i::Isolate* i_isolate = reinterpret_cast<i::Isolate*>(v8_isolate);
+   escape_slot_ = CreateHandle(
+       i_isolate, i::ReadOnlyRoots(i_isolate).the_hole_value().ptr());
