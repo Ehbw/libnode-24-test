@@ -1,0 +1,52 @@
+diff --git forkSrcPrefix/deps/v8/src/compiler/wasm-compiler.cc forkDstPrefix/deps/v8/src/compiler/wasm-compiler.cc
+index 16f1f1470b782ce3584ba4bb6626501c9f9551b7..db6da83dd1fb046b41a3d6b01b9e87c9878e6ee1 100644
+--- forkSrcPrefix/deps/v8/src/compiler/wasm-compiler.cc
++++ forkDstPrefix/deps/v8/src/compiler/wasm-compiler.cc
+@@ -8438,10 +8438,11 @@ std::unique_ptr<OptimizedCompilationJob> NewJSToWasmCompilationJob(
+     wasm::WasmFeatures enabled_features) {
+   std::unique_ptr<char[]> debug_name = WasmExportedFunction::GetDebugName(sig);
+   if (v8_flags.turboshaft_wasm_wrappers) {
++    wasm::WrapperCompilationInfo wrapper_info;
++    wrapper_info.code_kind = CodeKind::JS_TO_WASM_FUNCTION;
++    wrapper_info.is_import = is_import;
+     return Pipeline::NewWasmTurboshaftWrapperCompilationJob(
+-        isolate, sig,
+-        wasm::WrapperCompilationInfo{.code_kind = CodeKind::JS_TO_WASM_FUNCTION,
+-                                     .is_import = is_import},
++        isolate, sig, wrapper_info,
+         module, std::move(debug_name), WasmAssemblerOptions());
+   } else {
+     std::unique_ptr<Zone> zone = std::make_unique<Zone>(
+@@ -8613,11 +8614,12 @@ wasm::WasmCompilationResult CompileWasmImportCallWrapper(
+                  '-');
+ 
+   auto compile_with_turboshaft = [&]() {
++    wasm::WrapperCompilationInfo wrapper_info;
++    wrapper_info.code_kind = CodeKind::WASM_TO_JS_FUNCTION;
++    wrapper_info.import_info = {kind, expected_arity, suspend};
+     return Pipeline::GenerateCodeForWasmNativeStubFromTurboshaft(
+         env->module, sig,
+-        wasm::WrapperCompilationInfo{
+-            .code_kind = CodeKind::WASM_TO_JS_FUNCTION,
+-            .import_info = {kind, expected_arity, suspend}},
++      wrapper_info,
+         func_name, WasmStubAssemblerOptions(), nullptr);
+   };
+   auto compile_with_turbofan = [&]() {
+@@ -8774,12 +8776,13 @@ MaybeHandle<Code> CompileWasmToJSWrapper(Isolate* isolate,
+       base::VectorOf(name_buffer.get(), kMaxNameLen) + kNamePrefixLen, sig);
+ 
+   auto compile_with_turboshaft = [&]() {
++    wasm::WrapperCompilationInfo wrapper_info;
++    wrapper_info.code_kind = CodeKind::WASM_TO_JS_FUNCTION;
++    wrapper_info.import_info = {kind, expected_arity, suspend};
+     std::unique_ptr<turboshaft::TurboshaftCompilationJob> job =
+         Pipeline::NewWasmTurboshaftWrapperCompilationJob(
+             isolate, sig,
+-            wasm::WrapperCompilationInfo{
+-                .code_kind = CodeKind::WASM_TO_JS_FUNCTION,
+-                .import_info = {kind, expected_arity, suspend}},
++        wrapper_info,
+             nullptr, std::move(name_buffer), WasmAssemblerOptions());
+ 
+     // Compile the wrapper

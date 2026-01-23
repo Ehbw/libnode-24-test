@@ -1,8 +1,26 @@
+diff --git forkSrcPrefix/node.gypi forkDstPrefix/node.gypi
+index 36ed39f30855ff25c1c79aa3773d1383ddcb84f9..7842648b585602a6246691a8f818f6ae71f7eb7c 100644
+--- forkSrcPrefix/node.gypi
++++ forkDstPrefix/node.gypi
+@@ -195,13 +195,6 @@
+               '-Wl,-force_load,<(PRODUCT_DIR)/libuv<(STATIC_LIB_SUFFIX)',
+             ],
+           },
+-          'msvs_settings': {
+-            'VCLinkerTool': {
+-              'AdditionalOptions': [
+-                '/WHOLEARCHIVE:<(PRODUCT_DIR)/lib/libuv<(STATIC_LIB_SUFFIX)',
+-              ],
+-            },
+-          },
+           'conditions': [
+             ['OS!="aix" and OS!="os400" and OS!="ios" and node_shared=="false"', {
+               'ldflags': [
 diff --git forkSrcPrefix/deps/uv/uv.gyp forkDstPrefix/deps/uv/uv.gyp
-index 540445f1f3249b86c6ea15e3111644da206d2e33..2c269832cae676131f804e6d94a86fa159875a6e 100644
+index 540445f1f3249b86c6ea15e3111644da206d2e33..eccda72829ca0bcb958e25775d28b0e64fa6bcaf 100644
 --- forkSrcPrefix/deps/uv/uv.gyp
 +++ forkDstPrefix/deps/uv/uv.gyp
-@@ -151,7 +151,21 @@
+@@ -151,7 +151,39 @@
      ],
    },
  
@@ -20,12 +38,30 @@ index 540445f1f3249b86c6ea15e3111644da206d2e33..2c269832cae676131f804e6d94a86fa1
 +          ],
 +        }],
 +      }],
++      ['OS!="win" and uv_library=="shared_library"', {
++        'actions': [
++          {
++            'action_name': 'libuv_shared_archive_alias',
++            'inputs': [
++              '<(PRODUCT_DIR)/obj.target/deps/uv/libuv.so',
++            ],
++            'outputs': [
++              '<(PRODUCT_DIR)/obj.target/deps/uv/libuv.a',
++            ],
++            'action': [
++              '<(python)', '../../tools/copyfile.py',
++              '<@(_inputs)',
++              '<@(_outputs)',
++            ],
++          },
++        ],
++      }],
 +    ],
 +  },
      {
        'target_name': 'libuv',
        'toolsets': ['host', 'target'],
-@@ -251,7 +265,7 @@
+@@ -251,7 +283,7 @@
                # This will cause gyp to set soname
                # Must correspond with UV_VERSION_MAJOR
                # in include/uv/version.h
@@ -34,6 +70,19 @@ index 540445f1f3249b86c6ea15e3111644da206d2e33..2c269832cae676131f804e6d94a86fa1
              }],
            ],
          }],
+diff --git forkSrcPrefix/common.gypi forkDstPrefix/common.gypi
+index ae31b372b96358a156761ec7e9c39c9530d1abd1..32aa21e333708d82e137c4eb1ae7888c1f6121b3 100644
+--- forkSrcPrefix/common.gypi
++++ forkDstPrefix/common.gypi
+@@ -23,7 +23,7 @@
+     'node_shared_openssl%': 'false',
+ 
+     'node_tag%': '',
+-    'uv_library%': 'static_library',
++    'uv_library%': 'shared_library',
+ 
+     'clang%': 0,
+     'error_on_warn%': 'false',
 diff --git forkSrcPrefix/node.gyp forkDstPrefix/node.gyp
 index 0e0071b508f605bb9b7722f8304814dc176d907e..cdcb340ae4025c536f7c95bf77aaa60d4f581b73 100644
 --- forkSrcPrefix/node.gyp
@@ -55,34 +104,3 @@ index 0e0071b508f605bb9b7722f8304814dc176d907e..cdcb340ae4025c536f7c95bf77aaa60d
        ],
  
        'sources': [
-diff --git forkSrcPrefix/node.gypi forkDstPrefix/node.gypi
-index 36ed39f30855ff25c1c79aa3773d1383ddcb84f9..7842648b585602a6246691a8f818f6ae71f7eb7c 100644
---- forkSrcPrefix/node.gypi
-+++ forkDstPrefix/node.gypi
-@@ -195,13 +195,6 @@
-               '-Wl,-force_load,<(PRODUCT_DIR)/libuv<(STATIC_LIB_SUFFIX)',
-             ],
-           },
--          'msvs_settings': {
--            'VCLinkerTool': {
--              'AdditionalOptions': [
--                '/WHOLEARCHIVE:<(PRODUCT_DIR)/lib/libuv<(STATIC_LIB_SUFFIX)',
--              ],
--            },
--          },
-           'conditions': [
-             ['OS!="aix" and OS!="os400" and OS!="ios" and node_shared=="false"', {
-               'ldflags': [
-diff --git forkSrcPrefix/common.gypi forkDstPrefix/common.gypi
-index ae31b372b96358a156761ec7e9c39c9530d1abd1..32aa21e333708d82e137c4eb1ae7888c1f6121b3 100644
---- forkSrcPrefix/common.gypi
-+++ forkDstPrefix/common.gypi
-@@ -23,7 +23,7 @@
-     'node_shared_openssl%': 'false',
- 
-     'node_tag%': '',
--    'uv_library%': 'static_library',
-+    'uv_library%': 'shared_library',
- 
-     'clang%': 0,
-     'error_on_warn%': 'false',
