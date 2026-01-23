@@ -1,8 +1,41 @@
+diff --git forkSrcPrefix/vcbuild.bat forkDstPrefix/vcbuild.bat
+index aa3c1a34e42f300a0f681843c9766951f1835954..e4dfe43058ef845020f77d1680f6143463a1bb74 100644
+--- forkSrcPrefix/vcbuild.bat
++++ forkDstPrefix/vcbuild.bat
+@@ -475,11 +475,11 @@ if errorlevel 1 echo Cannot copy nodevars.bat && goto package_error
+ copy /Y ..\tools\msvs\install_tools\*.* %TARGET_NAME%\ > nul
+ if errorlevel 1 echo Cannot copy install_tools scripts && goto package_error
+ if defined dll (
+-  copy /Y libnode.dll %TARGET_NAME%\ > nul
+-  if errorlevel 1 echo Cannot copy libnode.dll && goto package_error
++  copy /Y libnode22.dll %TARGET_NAME%\ > nul
++  if errorlevel 1 echo Cannot copy libnode22.dll && goto package_error
+ 
+-  copy /Y libnode.lib %TARGET_NAME%\ > nul
+-  if errorlevel 1 echo Cannot copy libnode.lib && goto package_error
++  copy /Y libnode22.lib %TARGET_NAME%\ > nul
++  if errorlevel 1 echo Cannot copy libnode22.lib && goto package_error
+ 
+   mkdir %TARGET_NAME%\Release > nul
+   copy /Y node.def %TARGET_NAME%\Release\ > nul
+diff --git forkSrcPrefix/node.gyp forkDstPrefix/node.gyp
+index 0e0071b508f605bb9b7722f8304814dc176d907e..5edf731c23684629784c4036d2ed66686fab522a 100644
+--- forkSrcPrefix/node.gyp
++++ forkDstPrefix/node.gyp
+@@ -30,7 +30,7 @@
+     'node_v8_options%': '',
+     'node_enable_v8_vtunejit%': 'false',
+     'node_core_target_name%': 'node',
+-    'node_lib_target_name%': 'libnode',
++    'node_lib_target_name%': 'libnode22',
+     'node_intermediate_lib_type%': 'static_library',
+     'node_builtin_modules_path%': '',
+     'linked_module_files': [
 diff --git forkSrcPrefix/tools/install.py forkDstPrefix/tools/install.py
-index bf54249b66c0d4e179deaae5a9fd55568e694fe0..ca1ee80b0400a8c5bbf14b44a6eaa6e8666a7a49 100755
+index 8797b59e59c85a8877b977fa3281e50165e6f6b2..36f2993a097501957f1e89fa22699c1c1d916822 100755
 --- forkSrcPrefix/tools/install.py
 +++ forkDstPrefix/tools/install.py
-@@ -151,31 +151,31 @@ def files(options, action):
+@@ -157,33 +157,33 @@ def files(options, action):
  
    if 'true' == options.variables.get('node_shared'):
      if options.is_win:
@@ -39,41 +72,19 @@ index bf54249b66c0d4e179deaae5a9fd55568e694fe0..ca1ee80b0400a8c5bbf14b44a6eaa6e8
 +      link_path = abspath(options.install_path, 'lib/libnode22.so')
        try_symlink(options, so_name, link_path)
      else:
--      output_lib = 'libnode.' + options.variables.get('shlib_suffix')
-+      output_lib = 'libnode22.' + options.variables.get('shlib_suffix')
-       action(options, [os.path.join(options.build_dir, output_lib)],
-              os.path.join(options.variables.get('libdir'), output_lib))
+       # Ninja and Makefile generators output the library in different directories;
+       # find out which one we have, and install first found
+-      output_lib_name = 'libnode.' + options.variables.get('shlib_suffix')
++      output_lib_name = 'libnode22.' + options.variables.get('shlib_suffix')
+       output_lib_candidate_paths = [
+         os.path.join(options.build_dir, output_lib_name),
+         os.path.join(options.build_dir, "lib", output_lib_name),
+@@ -191,7 +191,7 @@ def files(options, action):
+       try:
+         output_lib = next(filter(os.path.exists, output_lib_candidate_paths))
+       except StopIteration as not_found:
+-        raise RuntimeError("No libnode.so to install!") from not_found
++        raise RuntimeError("No libnode22.so to install!") from not_found
+       action(options, [output_lib],
+              os.path.join(options.variables.get('libdir'), output_lib_name))
  
-diff --git forkSrcPrefix/node.gyp forkDstPrefix/node.gyp
-index 46baef1db3eacec9592296b583d76e3ffcf4de59..8f61828079ec06c3624f6ec83273f5144dfa2221 100644
---- forkSrcPrefix/node.gyp
-+++ forkDstPrefix/node.gyp
-@@ -27,7 +27,7 @@
-     'node_v8_options%': '',
-     'node_enable_v8_vtunejit%': 'false',
-     'node_core_target_name%': 'node',
--    'node_lib_target_name%': 'libnode',
-+    'node_lib_target_name%': 'libnode22',
-     'node_intermediate_lib_type%': 'static_library',
-     'node_builtin_modules_path%': '',
-     'linked_module_files': [
-diff --git forkSrcPrefix/vcbuild.bat forkDstPrefix/vcbuild.bat
-index 428577c5c3d1e9ab55285d7d985fc06ec0ac1dd4..002b7e6558265557ed1c76bb94f9695f7603180d 100644
---- forkSrcPrefix/vcbuild.bat
-+++ forkDstPrefix/vcbuild.bat
-@@ -458,11 +458,11 @@ if errorlevel 1 echo Cannot copy nodevars.bat && goto package_error
- copy /Y ..\tools\msvs\install_tools\*.* %TARGET_NAME%\ > nul
- if errorlevel 1 echo Cannot copy install_tools scripts && goto package_error
- if defined dll (
--  copy /Y libnode.dll %TARGET_NAME%\ > nul
--  if errorlevel 1 echo Cannot copy libnode.dll && goto package_error
-+  copy /Y libnode22.dll %TARGET_NAME%\ > nul
-+  if errorlevel 1 echo Cannot copy libnode22.dll && goto package_error
- 
--  copy /Y libnode.lib %TARGET_NAME%\ > nul
--  if errorlevel 1 echo Cannot copy libnode.lib && goto package_error
-+  copy /Y libnode22.lib %TARGET_NAME%\ > nul
-+  if errorlevel 1 echo Cannot copy libnode22.lib && goto package_error
- 
-   mkdir %TARGET_NAME%\Release > nul
-   copy /Y node.def %TARGET_NAME%\Release\ > nul

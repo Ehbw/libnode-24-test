@@ -1,13 +1,13 @@
 diff --git forkSrcPrefix/deps/icu-small/source/tools/toolutil/pkg_genc.cpp forkDstPrefix/deps/icu-small/source/tools/toolutil/pkg_genc.cpp
-index 741a8a5228ca6808ea486e765e8165e229cc73fb..f5c621ab151850ad5010df3ebb42f425ec0068c2 100644
+index c33343318b3d2da6482a5548a9e810e3b96f6632..f144978f92f02d5855fdd9ce02a427c76beb2566 100644
 --- forkSrcPrefix/deps/icu-small/source/tools/toolutil/pkg_genc.cpp
 +++ forkDstPrefix/deps/icu-small/source/tools/toolutil/pkg_genc.cpp
-@@ -847,7 +847,7 @@ getArchitecture(uint16_t *pCPU, uint16_t *pBits, UBool *pIsBigEndian, const char
- #   if defined(_M_IX86)
-         *pCPU = IMAGE_FILE_MACHINE_I386;
- #   else
--        *pCPU = IMAGE_FILE_MACHINE_UNKNOWN;
-+        *pCPU = IMAGE_FILE_MACHINE_AMD64;
+@@ -877,7 +877,7 @@ getArchitecture(
+                 std::terminate(); // Unreachable.
+             }
+ #       else
+-            *pCPU = IMAGE_FILE_MACHINE_UNKNOWN;
++            *pCPU = IMAGE_FILE_MACHINE_AMD64; // Default to x64 for non-ClangCL compilers.
+ #       endif
  #   endif
  #   if defined(_M_IA64) || defined(_M_AMD64) || defined (_M_ARM64)
-         *pBits = 64; // Doesn't seem to be used for anything interesting though?

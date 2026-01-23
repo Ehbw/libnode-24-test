@@ -1,21 +1,8 @@
-diff --git a/common.gypi b/common.gypi
-index de83a56672..1f5c1781bb 100644
---- a/common.gypi
-+++ b/common.gypi
-@@ -23,7 +23,7 @@
-     'node_shared_openssl%': 'false',
- 
-     'node_tag%': '',
--    'uv_library%': 'static_library',
-+    'uv_library%': 'shared_library',
- 
-     'clang%': 0,
-     'error_on_warn%': 'false',
-diff --git a/deps/uv/uv.gyp b/deps/uv/uv.gyp
-index 6c86c3fa50..006596e86a 100644
---- a/deps/uv/uv.gyp
-+++ b/deps/uv/uv.gyp
-@@ -150,7 +150,21 @@
+diff --git forkSrcPrefix/deps/uv/uv.gyp forkDstPrefix/deps/uv/uv.gyp
+index 540445f1f3249b86c6ea15e3111644da206d2e33..2c269832cae676131f804e6d94a86fa159875a6e 100644
+--- forkSrcPrefix/deps/uv/uv.gyp
++++ forkDstPrefix/deps/uv/uv.gyp
+@@ -151,7 +151,21 @@
      ],
    },
  
@@ -38,7 +25,7 @@ index 6c86c3fa50..006596e86a 100644
      {
        'target_name': 'libuv',
        'toolsets': ['host', 'target'],
-@@ -246,7 +260,7 @@
+@@ -251,7 +265,7 @@
                # This will cause gyp to set soname
                # Must correspond with UV_VERSION_MAJOR
                # in include/uv/version.h
@@ -47,11 +34,11 @@ index 6c86c3fa50..006596e86a 100644
              }],
            ],
          }],
-diff --git a/node.gyp b/node.gyp
-index 11474953b1..a45c909938 100644
---- a/node.gyp
-+++ b/node.gyp
-@@ -19,7 +19,7 @@
+diff --git forkSrcPrefix/node.gyp forkDstPrefix/node.gyp
+index 0e0071b508f605bb9b7722f8304814dc176d907e..cdcb340ae4025c536f7c95bf77aaa60d4f581b73 100644
+--- forkSrcPrefix/node.gyp
++++ forkDstPrefix/node.gyp
+@@ -20,7 +20,7 @@
      'node_shared_zlib%': 'false',
      'node_shared_http_parser%': 'false',
      'node_shared_cares%': 'false',
@@ -60,19 +47,19 @@ index 11474953b1..a45c909938 100644
      'node_shared_sqlite%': 'false',
      'node_shared_uvwasi%': 'false',
      'node_shared_nghttp2%': 'false',
-@@ -863,6 +863,7 @@
-         'deps/ada/ada.gyp:ada',
+@@ -845,6 +845,7 @@
          'deps/nbytes/nbytes.gyp:nbytes',
+         'tools/v8_gypfiles/abseil.gyp:abseil',
          'node_js2c#host',
 +        'deps/uv/uv.gyp:libuv_postbuild',
        ],
  
        'sources': [
-diff --git a/node.gypi b/node.gypi
-index 44780fe3b1..10346730bf 100644
---- a/node.gypi
-+++ b/node.gypi
-@@ -188,13 +188,6 @@
+diff --git forkSrcPrefix/node.gypi forkDstPrefix/node.gypi
+index 36ed39f30855ff25c1c79aa3773d1383ddcb84f9..7842648b585602a6246691a8f818f6ae71f7eb7c 100644
+--- forkSrcPrefix/node.gypi
++++ forkDstPrefix/node.gypi
+@@ -195,13 +195,6 @@
                '-Wl,-force_load,<(PRODUCT_DIR)/libuv<(STATIC_LIB_SUFFIX)',
              ],
            },
@@ -86,3 +73,16 @@ index 44780fe3b1..10346730bf 100644
            'conditions': [
              ['OS!="aix" and OS!="os400" and OS!="ios" and node_shared=="false"', {
                'ldflags': [
+diff --git forkSrcPrefix/common.gypi forkDstPrefix/common.gypi
+index ae31b372b96358a156761ec7e9c39c9530d1abd1..32aa21e333708d82e137c4eb1ae7888c1f6121b3 100644
+--- forkSrcPrefix/common.gypi
++++ forkDstPrefix/common.gypi
+@@ -23,7 +23,7 @@
+     'node_shared_openssl%': 'false',
+ 
+     'node_tag%': '',
+-    'uv_library%': 'static_library',
++    'uv_library%': 'shared_library',
+ 
+     'clang%': 0,
+     'error_on_warn%': 'false',

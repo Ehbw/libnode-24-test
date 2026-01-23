@@ -1,23 +1,23 @@
 diff --git forkSrcPrefix/tools/v8_gypfiles/features.gypi forkDstPrefix/tools/v8_gypfiles/features.gypi
-index 6e21dac6d70ede1f6dbd6a525fb9f111d6c2eb96..bbe0a0b033f1c48119a5e73874b8d17df9e292a9 100644
+index 1193bf6a896e01c620685171f98a9cad16b65ff6..6dee3abca7ec994b17958de12185bd17fac90095 100644
 --- forkSrcPrefix/tools/v8_gypfiles/features.gypi
 +++ forkDstPrefix/tools/v8_gypfiles/features.gypi
-@@ -328,7 +328,8 @@
- 
-     # Enable advanced BigInt algorithms, costing about 10-30 KiB binary size
+@@ -335,6 +335,9 @@
      # depending on platform.
--    'v8_advanced_bigint_algorithms%': 1
-+    'v8_advanced_bigint_algorithms%': 1,
-+    'use_rtti%': 1
-   },
+     'v8_advanced_bigint_algorithms%': 1,
  
-   'target_defaults': {
++    # Cfx changes
++    'use_rtti%': 1,
++
+     # Enable 256-bit long vector re-vectorization pass in WASM compilation pipeline.
+     'v8_enable_wasm_simd256_revec%' : 0
+   },
 diff --git forkSrcPrefix/common.gypi forkDstPrefix/common.gypi
-index de83a566724a36fff8b0c4ca9ba7e151a8c39f54..e1ccc53bdc0b83fd225354c1551fda8a66c57099 100644
+index ae31b372b96358a156761ec7e9c39c9530d1abd1..7f590685392b387fe0b7715ea7bbe2a7fbcf3fea 100644
 --- forkSrcPrefix/common.gypi
 +++ forkDstPrefix/common.gypi
-@@ -490,10 +490,9 @@
-       [ 'OS in "linux freebsd openbsd solaris android aix os400 cloudabi"', {
+@@ -511,10 +511,9 @@
+       [ 'OS in "linux freebsd openbsd solaris android aix os400 cloudabi openharmony"', {
          'cflags': [ '-Wall', '-Wextra', '-Wno-unused-parameter', ],
          'cflags_cc': [
 -          '-fno-rtti',

@@ -1,8 +1,20 @@
+diff --git forkSrcPrefix/src/node_options.h forkDstPrefix/src/node_options.h
+index 2e73fd2a05e329910d4c064474880f770c9f5957..b0093712a25e709933cfb7b44833da51399a0030 100644
+--- forkSrcPrefix/src/node_options.h
++++ forkDstPrefix/src/node_options.h
+@@ -116,6 +116,7 @@ class EnvironmentOptions : public Options {
+   bool abort_on_uncaught_exception = false;
+   std::vector<std::string> conditions;
+   bool detect_module = true;
++  bool cfx = true;
+   bool disable_sigusr1 = false;
+   bool print_required_tla = false;
+   bool require_module = true;
 diff --git forkSrcPrefix/src/node_options.cc forkDstPrefix/src/node_options.cc
-index d3b59690e917afcf725cbfb1232d6ed9f298ee3a..2b055cad524d6c0ab16d950f7b51d640187c784e 100644
+index 31fc23fdbfabceab3cffd81a3e6650dde1ccd13a..cd5b0942ec67292de038e3aba67280cfa42671c0 100644
 --- forkSrcPrefix/src/node_options.cc
 +++ forkDstPrefix/src/node_options.cc
-@@ -355,6 +355,9 @@ DebugOptionsParser::DebugOptionsParser() {
+@@ -411,6 +411,9 @@ DebugOptionsParser::DebugOptionsParser() {
  }
  
  EnvironmentOptionsParser::EnvironmentOptionsParser() {
@@ -12,15 +24,3 @@ index d3b59690e917afcf725cbfb1232d6ed9f298ee3a..2b055cad524d6c0ab16d950f7b51d640
    AddOption("--conditions",
              "additional user conditions for conditional exports and imports",
              &EnvironmentOptions::conditions,
-diff --git forkSrcPrefix/src/node_options.h forkDstPrefix/src/node_options.h
-index fc7f898a6b9b6072c15d77710c20ed1ba580966b..50e21ab6a71bacceec6919669ee002dbeeb87039 100644
---- forkSrcPrefix/src/node_options.h
-+++ forkDstPrefix/src/node_options.h
-@@ -116,6 +116,7 @@ class EnvironmentOptions : public Options {
-   bool abort_on_uncaught_exception = false;
-   std::vector<std::string> conditions;
-   bool detect_module = true;
-+  bool cfx = true;
-   bool print_required_tla = false;
-   bool require_module = false;
-   std::string dns_result_order;
