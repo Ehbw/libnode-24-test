@@ -1,0 +1,13 @@
+diff --git forkSrcPrefix/deps/v8/src/heap/marking-barrier-inl.h forkDstPrefix/deps/v8/src/heap/marking-barrier-inl.h
+index 84fd7752906e522dc11d9d6aef2966f7d62ff45b..6952645be3ec0a9785afc6ad156af9c3f35a3b47 100644
+--- forkSrcPrefix/deps/v8/src/heap/marking-barrier-inl.h
++++ forkDstPrefix/deps/v8/src/heap/marking-barrier-inl.h
+@@ -77,6 +77,8 @@ void MarkingBarrier::MarkValueShared(Tagged<HeapObject> value) {
+ 
+ void MarkingBarrier::MarkValueLocal(Tagged<HeapObject> value) {
+   DCHECK(!InReadOnlySpace(value));
++  // Temporary safety check before we found a way to fix race condition between GC and microtasks
++  if (V8_UNLIKELY(!is_activated_)) return;
+   if (is_minor()) {
+     // We do not need to insert into RememberedSet<OLD_TO_NEW> here because the
+     // C++ marking barrier already does this for us.
