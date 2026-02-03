@@ -75,7 +75,7 @@ jobs:
         uses: jirutka/setup-alpine@v1
         if: runner.os != 'Windows'
         with:
-          branch: v3.16
+          branch: v3.20
           packages: >
             git bash binutils-gold curl gnupg libgcc linux-headers make python3 ccache xz libatomic
             clang clang-dev clang-libs llvm13-dev lld
