@@ -1,8 +1,8 @@
-diff --git forkSrcPrefix/deps/v8/src/api/api.cc forkDstPrefix/deps/v8/src/api/api.cc
-index 2dd476dda34f1cfe3a75b7895009af24963372f2..6476204733a8aa87c4681dbeb5fee12db54e529d 100644
---- forkSrcPrefix/deps/v8/src/api/api.cc
-+++ forkDstPrefix/deps/v8/src/api/api.cc
-@@ -883,7 +883,21 @@ void InternalFieldOutOfBounds(int index) {
+diff --git a/deps/v8/src/api/api.cc b/deps/v8/src/api/api.cc
+index ba759168aa9..ecea0363c75 100644
+--- a/deps/v8/src/api/api.cc
++++ b/deps/v8/src/api/api.cc
+@@ -689,7 +689,21 @@ void InternalFieldOutOfBounds(int index) {
  
  // --- H a n d l e s ---
  
@@ -17,7 +17,7 @@ index 2dd476dda34f1cfe3a75b7895009af24963372f2..6476204733a8aa87c4681dbeb5fee12d
 +}
 +
 +HandleScope::HandleScope(Isolate* v8_isolate) {
-+  if(g_enterScopeCB) {
++  if (g_enterScopeCB) {
 +    g_enterScopeCB(v8_isolate);
 +  }
 +  Initialize(v8_isolate);
@@ -25,21 +25,21 @@ index 2dd476dda34f1cfe3a75b7895009af24963372f2..6476204733a8aa87c4681dbeb5fee12d
  
  void HandleScope::Initialize(Isolate* v8_isolate) {
    i::Isolate* i_isolate = reinterpret_cast<i::Isolate*>(v8_isolate);
-@@ -908,6 +922,9 @@ void HandleScope::Initialize(Isolate* v8_isolate) {
+@@ -714,6 +728,9 @@ void HandleScope::Initialize(Isolate* v8_isolate) {
  }
  
  HandleScope::~HandleScope() {
-+  if(g_leaveScopeCB) {
++  if(g_leaveScopeCB){
 +    g_leaveScopeCB(reinterpret_cast<Isolate*>(i_isolate_));
 +  }
  #ifdef V8_ENABLE_CHECKS
    CHECK_EQ(scope_level_, i_isolate_->handle_scope_data()->level);
  #endif
-@@ -938,6 +955,9 @@ i::Address* HandleScope::CreateHandleForCurrentIsolate(i::Address value) {
- #endif  // V8_ENABLE_DIRECT_LOCAL
+@@ -744,6 +761,9 @@ i::Address* HandleScope::CreateHandleForCurrentIsolate(i::Address value) {
+ #endif  // V8_ENABLE_DIRECT_HANDLE
  
  EscapableHandleScopeBase::EscapableHandleScopeBase(Isolate* v8_isolate) {
-+  if(g_enterScopeCB) {
++  if(g_enterScopeCB){
 +    g_enterScopeCB(v8_isolate);
 +  }
    i::Isolate* i_isolate = reinterpret_cast<i::Isolate*>(v8_isolate);

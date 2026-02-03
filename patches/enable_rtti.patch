@@ -1,8 +1,20 @@
+diff --git forkSrcPrefix/common.gypi forkDstPrefix/common.gypi
+index db162537869..1723def3d52 100644
+--- forkSrcPrefix/common.gypi
++++ forkDstPrefix/common.gypi
+@@ -511,7 +511,6 @@
+       [ 'OS in "linux freebsd openbsd solaris android aix os400 cloudabi openharmony"', {
+         'cflags': [ '-Wall', '-Wextra', '-Wno-unused-parameter', ],
+         'cflags_cc': [
+-          '-fno-rtti',
+           '-fno-exceptions',
+           '-fno-strict-aliasing',
+           '-std=gnu++20',
 diff --git forkSrcPrefix/tools/v8_gypfiles/features.gypi forkDstPrefix/tools/v8_gypfiles/features.gypi
-index 1193bf6a896e01c620685171f98a9cad16b65ff6..6dee3abca7ec994b17958de12185bd17fac90095 100644
+index 81272ed99d7..2d774b23e6f 100644
 --- forkSrcPrefix/tools/v8_gypfiles/features.gypi
 +++ forkDstPrefix/tools/v8_gypfiles/features.gypi
-@@ -335,6 +335,9 @@
+@@ -331,6 +331,9 @@
      # depending on platform.
      'v8_advanced_bigint_algorithms%': 1,
  
@@ -12,19 +24,3 @@ index 1193bf6a896e01c620685171f98a9cad16b65ff6..6dee3abca7ec994b17958de12185bd17
      # Enable 256-bit long vector re-vectorization pass in WASM compilation pipeline.
      'v8_enable_wasm_simd256_revec%' : 0
    },
-diff --git forkSrcPrefix/common.gypi forkDstPrefix/common.gypi
-index ae31b372b96358a156761ec7e9c39c9530d1abd1..7f590685392b387fe0b7715ea7bbe2a7fbcf3fea 100644
---- forkSrcPrefix/common.gypi
-+++ forkDstPrefix/common.gypi
-@@ -511,10 +511,9 @@
-       [ 'OS in "linux freebsd openbsd solaris android aix os400 cloudabi openharmony"', {
-         'cflags': [ '-Wall', '-Wextra', '-Wno-unused-parameter', ],
-         'cflags_cc': [
--          '-fno-rtti',
-           '-fno-exceptions',
-           '-fno-strict-aliasing',
--          '-std=gnu++17',
-+          '-std=gnu++20',
-         ],
-         'defines': [ '__STDC_FORMAT_MACROS' ],
-         'ldflags': [ '-rdynamic' ],
